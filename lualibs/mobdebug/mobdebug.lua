@@ -19,7 +19,7 @@ end)("os")
 
 local mobdebug = {
   _NAME = "mobdebug",
-  _VERSION = 0.611,
+  _VERSION = 0.612,
   _COPYRIGHT = "Paul Kulchenko",
   _DESCRIPTION = "Mobile Remote Debugger for the Lua programming language",
   port = os and os.getenv and tonumber((os.getenv("MOBDEBUG_PORT"))) or 8172,
@@ -127,7 +127,7 @@ end
 local function q(s) return s:gsub('([%(%)%.%%%+%-%*%?%[%^%$%]])','%%%1') end
 
 local serpent = (function() ---- include Serpent module for serialization
-local n, v = "serpent", 0.272 -- (C) 2012-13 Paul Kulchenko; MIT License
+local n, v = "serpent", 0.273 -- (C) 2012-13 Paul Kulchenko; MIT License
 local c, d = "Paul Kulchenko", "Lua serializer and pretty printer"
 local snum = {[tostring(1/0)]='1/0 --[[math.huge]]',[tostring(-1/0)]='-1/0 --[[-math.huge]]',[tostring(0/0)]='0/0'}
 local badtype = {thread = true, userdata = true, cdata = true}
@@ -203,15 +203,15 @@ local function s(t, opts)
             local sname = safename(iname, gensym(key)) -- iname is table for local variables
             sref[#sref] = val2str(key,sname,indent,sname,iname,true) end
           sref[#sref+1] = 'placeholder'
-          local path = seen[t]..'['.. tostring(seen[key] or globals[key] or gensym(key))..']'
-          sref[#sref] = path..space..'='..space.. tostring(seen[value] or val2str(value,nil,indent,path))
+          local path = seen[t]..'['..tostring(seen[key] or globals[key] or gensym(key))..']'
+          sref[#sref] = path..space..'='..space..tostring(seen[value] or val2str(value,nil,indent,path))
         else
           out[#out+1] = val2str(value,key,indent,insref,seen[t],plainindex,level+1)
         end
       end
       local prefix = string.rep(indent or '', level)
-      local head = indent and '{\n'.. tostring(prefix) .. indent or '{'
-      local body = table.concat(out, ','.. (indent and '\n'..prefix..indent or space))
+      local head = indent and '{\n'..prefix..indent or '{'
+      local body = table.concat(out, ','..(indent and '\n'..prefix..indent or space))
       local tail = indent and "\n"..prefix..'}' or '}'
       return (custom and custom(tag,head,body,tail) or tag..head..body..tail)..comment(t, level)
     elseif badtype[ttype] then
@@ -266,7 +266,7 @@ local function removebasedir(path, basedir)
   if iscasepreserving then
     -- check if the lowercased path matches the basedir
     -- if so, return substring of the original path (to not lowercase it)
-    return path:lower():find('^'.. q(basedir:lower()))
+    return path:lower():find('^'..q(basedir:lower()))
       and path:sub(#basedir+1) or path
   else
     return string.gsub(path, '^'..q(basedir), '')
@@ -736,7 +736,7 @@ local function debugger_loop(sev, svars, sfile, sline)
         error("Debugger connection closed", 0)
       else
         -- if there is something in the pending buffer, prepend it to the line
-        if buf then line = buf .. tostring(line); buf = nil end
+        if buf then line = buf .. line; buf = nil end
         break
       end
     end
@@ -786,7 +786,7 @@ local function debugger_loop(sev, svars, sfile, sline)
       if abort == nil then -- no LOAD/RELOAD allowed inside start()
         if size > 0 then server:receive(size) end
         if sfile and sline then
-          server:send("201 Started " .. sfile .. " " .. sline .. "\n")
+          server:send("201 Started " .. sfile .. " " .. tostring(sline) .. "\n")
         else
           server:send("200 OK 0\n")
         end
@@ -810,7 +810,7 @@ local function debugger_loop(sev, svars, sfile, sline)
               debugee = func
               coroyield("load")
             else
-              server:send("401 Error in Expression " .. #res .. "\n")
+              server:send("401 Error in Expression " .. tostring(#res) .. "\n")
               server:send(res)
             end
           else
@@ -971,7 +971,7 @@ local function connect(controller_host, controller_port)
   if not sock then return nil, err end
 
   if sock.settimeout then sock:settimeout(mobdebug.connecttimeout) end
-  local res, err = sock:connect(tostring(controller_host), tostring(controller_port))
+  local res, err = sock:connect(controller_host, tostring(controller_port))
   if sock.settimeout then sock:settimeout() end
 
   if not res then return nil, err end
@@ -1320,7 +1320,7 @@ local function handle(params, client, options)
         if not file then
            _, _, file, lines = string.find(exp, "^(%S+)%s+(.+)")
         end
-        client:send("LOAD " .. #lines .. " " .. file .. "\n")
+        client:send("LOAD " .. tostring(#lines) .. " " .. file .. "\n")
         client:send(lines)
       else
         local file = io.open(exp, "r")
