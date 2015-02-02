@@ -41,6 +41,8 @@ with [Lua](http://notebook.kulchenko.com/zerobrane/live-coding-in-lua-bret-victo
 [Moai](http://notebook.kulchenko.com/zerobrane/live-coding-with-moai-and-zerobrane-studio),
 [Corona SDK](http://notebook.kulchenko.com/zerobrane/debugging-and-live-coding-with-corona-sdk-applications-and-zerobrane-studio),
 GSL-shell, and other engines.
+* Function outline.
+* Fuzzy search with `Go To File`, `Go To Symbol`, and `Insert Library Function`.
 * Several ways to extend the current functionality:
   - specs (`spec/`): specifications for file syntax, lexer, and keywords;
   - apis (`api/`): descriptions for [code completion and tooltips](http://studio.zerobrane.com/doc-api-auto-complete);
@@ -66,18 +68,18 @@ No compilation is needed, although the scripts to compile required libraries for
 
 ```
 Open file(s):
-  zbstudio <filename> [<filename>...]
-  any non-option will be treated as a file to open or a directory to set as the project directory
+  zbstudio [option] [<project directory>] <filename> [<filename>...]
+  non-options are treated as a project directory to set or a file to open
 
 Set project directory:
   zbstudio <project directory> [<filename>...]
   (0.39+) a directory passed as a parameter will be set as the project directory
 
-Overriding default configuration:
+Override default configuration:
   zbstudio -cfg "<luacode overriding config>" [<filename>]
   e.g.: zbstudio -cfg "editor.fontsize=12" somefile.lua
 
-Loading custom configuration:
+Load custom configuration:
   zbstudio -cfg path/file.lua [<filename>]
   e.g.: zbstudio -cfg cfg/estrela.lua
 ```
